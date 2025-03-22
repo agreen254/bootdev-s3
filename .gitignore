@@ -1,6 +1,7 @@
 out
 *.db
 .env
+.DS_Store
 assets/
 samples/
 learn-file-storage-s3-golang-starter
