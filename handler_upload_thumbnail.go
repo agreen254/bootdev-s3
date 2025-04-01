@@ -1,8 +1,6 @@
 package main
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"fmt"
 	"io"
 	"mime"
@@ -10,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
-	"strings"
 
 	"github.com/bootdotdev/learn-file-storage-s3-golang-starter/internal/auth"
 	"github.com/google/uuid"
@@ -64,9 +61,6 @@ func (cfg *apiConfig) handlerUploadThumbnail(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	tmp := strings.Split(mediaType, "/")
-	ext := tmp[len(tmp)-1]
-
 	video, err := cfg.db.GetVideo(videoID)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Failed to locate video", err)
@@ -77,10 +71,8 @@ func (cfg *apiConfig) handlerUploadThumbnail(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	bytes := make([]byte, 32)
-	rand.Read(bytes)
-	str := base64.RawURLEncoding.EncodeToString(bytes)
-	assetPath := filepath.Join(cfg.assetsRoot, fmt.Sprintf("%s.%s", str, ext))
+	str := getAssetPath(mediaType)
+	assetPath := filepath.Join(cfg.assetsRoot, str)
 	fullPath := fmt.Sprintf("http://localhost:%s/%s", cfg.port, assetPath)
 
 	file, err := os.Create(assetPath)
