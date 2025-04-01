@@ -130,7 +130,11 @@ func (cfg *apiConfig) handlerUploadVideo(w http.ResponseWriter, r *http.Request)
 	// presigning the url already includes the amazomaws url so no longer need to add that stuff
 	// bucketURL := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", cfg.s3Bucket, cfg.s3Region, key)
 	// bucketAndKey := fmt.Sprintf("%s,%s", cfg.s3Bucket, bucketURL)
-	url := fmt.Sprintf("%s,%s", cfg.s3Bucket, key)
+
+	// url storage for the presigning step. split on the comma character to get the bucket and key value
+	// url := fmt.Sprintf("%s,%s", cfg.s3Bucket, key)
+
+	url := "https://" + filepath.Join(cfg.s3CfDistribution, key)
 	video.VideoURL = &url
 
 	err = cfg.db.UpdateVideo(video)
@@ -139,11 +143,11 @@ func (cfg *apiConfig) handlerUploadVideo(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	video, err = cfg.dbVideoToSignedVideo(video)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Couldn't generate presigned URL", err)
-		return
-	}
+	// video, err = cfg.dbVideoToSignedVideo(video)
+	// if err != nil {
+	// 	respondWithError(w, http.StatusInternalServerError, "Couldn't generate presigned URL", err)
+	// 	return
+	// }
 
 	respondWithJSON(w, http.StatusOK, video)
 }
